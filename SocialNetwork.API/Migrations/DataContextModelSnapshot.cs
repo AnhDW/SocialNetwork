@@ -104,36 +104,6 @@ namespace SocialNetwork.API.Migrations
                     b.ToTable("Chats");
                 });
 
-            modelBuilder.Entity("SocialNetwork.API.Entities.ChatRoom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoomId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChatRooms");
-                });
-
             modelBuilder.Entity("SocialNetwork.API.Entities.Comment", b =>
                 {
                     b.Property<int>("UserId")
@@ -250,27 +220,20 @@ namespace SocialNetwork.API.Migrations
 
             modelBuilder.Entity("SocialNetwork.API.Entities.GroupMember", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("GroupId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("LastActive")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("MemberId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime>("JoinAt")
+                        .HasColumnType("datetime2");
 
-                    b.HasIndex("GroupId");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GroupId", "MemberId");
 
                     b.HasIndex("MemberId");
 
@@ -394,6 +357,36 @@ namespace SocialNetwork.API.Migrations
                     b.ToTable("Rooms");
                 });
 
+            modelBuilder.Entity("SocialNetwork.API.Entities.RoomChat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RoomChats");
+                });
+
             modelBuilder.Entity("SocialNetwork.API.Entities.RoomMember", b =>
                 {
                     b.Property<int>("RoomId")
@@ -414,6 +407,34 @@ namespace SocialNetwork.API.Migrations
                     b.HasIndex("MemberId");
 
                     b.ToTable("RoomMembers");
+                });
+
+            modelBuilder.Entity("SocialNetwork.API.Entities.TokenManagement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TokenManagements");
                 });
 
             modelBuilder.Entity("SocialNetwork.API.Entities.User", b =>
@@ -437,15 +458,18 @@ namespace SocialNetwork.API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Interests")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KnownAs")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastActive")
@@ -490,37 +514,18 @@ namespace SocialNetwork.API.Migrations
                     b.HasOne("SocialNetwork.API.Entities.User", "Receiver")
                         .WithMany("RecipientList")
                         .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SocialNetwork.API.Entities.User", "Sender")
                         .WithMany("SenderList")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Receiver");
 
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("SocialNetwork.API.Entities.ChatRoom", b =>
-                {
-                    b.HasOne("SocialNetwork.API.Entities.Room", "Room")
-                        .WithMany("ChatRooms")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("SocialNetwork.API.Entities.User", "User")
-                        .WithMany("ChatRooms")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialNetwork.API.Entities.Comment", b =>
@@ -654,6 +659,25 @@ namespace SocialNetwork.API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SocialNetwork.API.Entities.RoomChat", b =>
+                {
+                    b.HasOne("SocialNetwork.API.Entities.Room", "Room")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SocialNetwork.API.Entities.User", "User")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SocialNetwork.API.Entities.RoomMember", b =>
                 {
                     b.HasOne("SocialNetwork.API.Entities.User", "Member")
@@ -671,6 +695,17 @@ namespace SocialNetwork.API.Migrations
                     b.Navigation("Member");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("SocialNetwork.API.Entities.TokenManagement", b =>
+                {
+                    b.HasOne("SocialNetwork.API.Entities.User", "User")
+                        .WithMany("TokenManagements")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SocialNetwork.API.Entities.Group", b =>
@@ -723,6 +758,8 @@ namespace SocialNetwork.API.Migrations
                     b.Navigation("Rooms");
 
                     b.Navigation("SenderList");
+
+                    b.Navigation("TokenManagements");
                 });
 #pragma warning restore 612, 618
         }

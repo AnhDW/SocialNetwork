@@ -7,7 +7,7 @@
         public int CreatorId { get; set; }
 
         public User User { get; set; }
-        public List<RoomMember> RoomMembers { get; set; }
-        public List<ChatRoom> ChatRooms { get; set; }
+        public List<RoomMember> RoomMembers { get; set; } = new();
+        public List<RoomChat> ChatRooms { get; set; } = new();
     }
 }

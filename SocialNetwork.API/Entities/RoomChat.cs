@@ -1,6 +1,6 @@
 ﻿namespace SocialNetwork.API.Entities
 {
-    public class ChatRoom
+    public class RoomChat
     {
         public int Id { get; set; }
         public int RoomId { get; set; }

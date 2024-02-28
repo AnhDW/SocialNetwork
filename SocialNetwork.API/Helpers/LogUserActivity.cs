@@ -17,6 +17,14 @@ namespace SocialNetwork.API.Helpers
             var user = await repo.GetByUsernameAsync(username);
 
             user.LastActive = DateTime.UtcNow;
+
+            //var tokens = user.TokenManagements.Where(d => d.Created.CacuateTime() > 7).ToList();
+
+            //foreach (var token in tokens)
+            //{
+            //    token.IsActive = false;
+            //}
+
             await repo.SaveAllAsync();
         }
     }

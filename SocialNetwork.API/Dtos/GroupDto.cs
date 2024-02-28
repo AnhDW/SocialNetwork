@@ -1,4 +1,6 @@
-﻿namespace SocialNetwork.API.Dtos
+﻿using SocialNetwork.API.Entities;
+
+namespace SocialNetwork.API.Dtos
 {
     public class GroupDto
     {

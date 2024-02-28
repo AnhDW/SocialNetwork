@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
@@ -14,6 +13,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class LikePostsController : ControllerBase
     {
         private readonly IUserRepo _userRepo;
@@ -38,7 +38,7 @@ namespace SocialNetwork.API.Controllers
             if (sourceUserId == likePost.UserId) return BadRequest("You cannot like post yourself");
 
             var userLike = await _likePostRepo.GetUserLike(sourceUserId, postId);
-            if(userLike != null && reationType == null)
+            if(userLike != null && string.IsNullOrEmpty(reationType))
             {
                 await _likePostRepo.Delete(userLike);
                 return Ok("You unlike this post");
@@ -74,6 +74,19 @@ namespace SocialNetwork.API.Controllers
             Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages));
 
             return Ok(users);
+        }
+
+        [HttpGet("is-like/{postId}")]
+        public async Task<ActionResult<LikePostButtonDto>> IsLikePost(int postId)
+        {
+            var likeButton = new LikePostButtonDto();
+            likeButton.PostId = postId;
+            var likePost = await _likePostRepo.LikePost(User.GetUserId(), postId);
+            if (likePost == null) return BadRequest(likeButton);
+
+            likeButton.IsLike = true;
+            likeButton.ReactionType = likePost.ReationType;
+            return Ok(likeButton);
         }
     }
 }

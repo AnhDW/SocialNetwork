@@ -22,7 +22,7 @@ namespace SocialNetwork.API.Services
 
         public async Task<Group> GetGroup(int id)
         {
-            return await _context.Groups.FindAsync(id);
+            return await _context.Groups.Include(g => g.GroupMembers).FirstOrDefaultAsync(g => g.Id == id);
         }
 
         public async Task<PagedList<GroupDto>> GetGroups(GroupParams groupParams)

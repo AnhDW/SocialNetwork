@@ -11,5 +11,6 @@ namespace SocialNetwork.API.Services.IServices
         Task<PagedList<InteractWithPostDto>> GetUserLikes(LikesParams likesParams);
         Task Update(LikePost likePost);
         Task Delete(LikePost likePost);
+        Task<LikePostDto> LikePost(int userId, int postId);
     }
 }

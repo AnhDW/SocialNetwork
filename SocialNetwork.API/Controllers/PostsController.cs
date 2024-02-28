@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.API.Dtos;
-using SocialNetwork.API.Entities;
 using SocialNetwork.API.Extensions;
 using SocialNetwork.API.Helpers;
 using SocialNetwork.API.Services.IServices;
-using System.Text.RegularExpressions;
 
 namespace SocialNetwork.API.Controllers
 {
@@ -15,6 +12,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class PostsController : ControllerBase
     {
         private readonly IPostRepo _postRepo;

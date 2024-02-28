@@ -13,6 +13,7 @@ namespace SocialNetwork.API.Services.IServices
         Task<User> GetByUsernameAsync(string username);
         Task<PagedList<PersonalPageDto>> GetPersonalPagesAsync(UserParams userParams);
         Task<PersonalPageDto> GetPersonalPageAsync(string username);
+        Task<PersonalPageDto> GetPersonalPageByIdAsync(int currentUserId);
 
 
     }

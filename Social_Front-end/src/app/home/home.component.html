@@ -1,0 +1,41 @@
+<app-navbar></app-navbar>
+<div class="container">
+    <div class="chat-list shadow-sm">
+        <div class="search-input">
+            <form action="">
+                <input type="text" placeholder="Search for users...">
+            </form>
+        </div>
+        <div class="list-users">
+            <ol class="list-group m-1" *ngFor="let user of users">
+                <li class="list-group-item d-flex justify-content-between align-items-start user-item">
+                    <div class="photo-avatar">
+                        <img class="img-thumbnail" src={{user.avatarUrl}}/>
+                    </div>
+                    <div class="ms-2 me-auto content">
+                        <div class="fw-bold">{{user.knownAs}}</div>
+                        {{user.lastActive}}
+                    </div>
+                    <span class="badge bg-danger rounded-pill">4</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+    <div class="messages shadow-sm">
+        <div class="messages-tools list-group-item d-flex justify-content-between align-items-start">
+            <div class="col-8 bg-danger">
+                1 of 2
+            </div>
+            <div class="col-4 bg-primary me-auto">
+                2 of 2 (wider)
+            </div>
+        </div>
+        <div class="messages-content"></div>
+        <div class="messages-input">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Aa" aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button class="btn btn-primary" type="button" id="button-addon2">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>

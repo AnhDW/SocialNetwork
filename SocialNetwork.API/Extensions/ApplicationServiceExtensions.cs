@@ -11,7 +11,7 @@ namespace SocialNetwork.API.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
             services.AddDbContext<DataContext>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
-
+            services.AddCors();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IPostRepo, PostRepo>();
             services.AddScoped<ILikePostRepo, LikePostRepo>();
@@ -20,6 +20,9 @@ namespace SocialNetwork.API.Extensions
             services.AddScoped<IChatRepo, ChatRepo>();
             services.AddScoped<IGroupRepo, GroupRepo>();
             services.AddScoped<IGroupMemberRepo, GroupMemberRepo>();
+            services.AddScoped<IRoomRepo, RoomRepo>();
+            services.AddScoped<IRoomMemberRepo, RoomMemberRepo>();
+            services.AddScoped<IRoomChatRepo, RoomChatRepo>();
             services.AddScoped<ITokenSvc, TokenSvc>();
             services.AddScoped<IAttachmentSvc, AttachmentSvc>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

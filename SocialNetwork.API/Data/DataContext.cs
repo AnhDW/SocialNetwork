@@ -20,10 +20,10 @@ namespace SocialNetwork.API.Data
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomMember> RoomMembers { get; set; }
-        public DbSet<ChatRoom> ChatRooms { get; set; }
+        public DbSet<RoomChat> RoomChats { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
+        public DbSet<TokenManagement> TokenManagements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +46,8 @@ namespace SocialNetwork.API.Data
                 .HasForeignKey(g => g.CreatorId);
             modelBuilder.Entity<User>().HasMany(p => p.Events).WithOne(u => u.User)
                 .HasForeignKey(g => g.CreatorId);
+            modelBuilder.Entity<User>().HasMany(p => p.TokenManagements).WithOne(u => u.User)
+                .HasForeignKey(t => t.UserId);
 
             modelBuilder.Entity<Attachment>().HasOne(p => p.Post).WithMany(a => a.Attachments)
                 .HasForeignKey(a => a.PostId);
@@ -64,10 +66,11 @@ namespace SocialNetwork.API.Data
 
 
             modelBuilder.Entity<Chat>().HasOne(s => s.Sender).WithMany(s => s.SenderList)
-                .HasForeignKey(c => c.SenderId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(c => c.SenderId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Chat>().HasOne(s => s.Receiver).WithMany(s => s.RecipientList)
-                .HasForeignKey(c => c.ReceiverId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(c => c.ReceiverId).OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<GroupMember>().HasKey(k => new { k.GroupId, k.MemberId });
             modelBuilder.Entity<GroupMember>().HasOne(g => g.Group).WithMany(g => g.GroupMembers)
                 .HasForeignKey(g => g.GroupId).OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<GroupMember>().HasOne(g => g.Member).WithMany(g => g.GroupMembers)
@@ -79,10 +82,11 @@ namespace SocialNetwork.API.Data
             modelBuilder.Entity<RoomMember>().HasOne(r => r.Member).WithMany(r => r.RoomMembers)
                 .HasForeignKey(r => r.MemberId).OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ChatRoom>().HasOne(r => r.Room).WithMany(r => r.ChatRooms)
+            modelBuilder.Entity<RoomChat>().HasOne(r => r.Room).WithMany(r => r.ChatRooms)
                 .HasForeignKey(r => r.RoomId).OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<ChatRoom>().HasOne(r => r.User).WithMany(r => r.ChatRooms)
+            modelBuilder.Entity<RoomChat>().HasOne(r => r.User).WithMany(r => r.ChatRooms)
                 .HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.NoAction);
+
         }
     }
 }

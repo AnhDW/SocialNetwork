@@ -27,17 +27,21 @@ namespace SocialNetwork.API.Services
 
         public async Task<User> GetByUsernameAsync(string username)
         {
-            return await _context.Users
-                .Include(p => p.Posts)
-                .Include(l => l.LikePosts)
-                .Include(g=>g.Groups)
-                .FirstOrDefaultAsync(u => u.UserName == username);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
         }
 
         public async Task<PersonalPageDto> GetPersonalPageAsync(string username)
         {
             return await _context.Users.Include(p => p.Posts)
                 .Where(u => u.UserName == username)
+                .ProjectTo<PersonalPageDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task<PersonalPageDto> GetPersonalPageByIdAsync(int currentUserId)
+        {
+            return await _context.Users.Include(p => p.Posts)
+                .Where(u => u.Id == currentUserId)
                 .ProjectTo<PersonalPageDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }

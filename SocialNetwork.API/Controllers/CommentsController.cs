@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
@@ -14,6 +13,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class CommentsController : ControllerBase
     {
         private readonly IUserRepo _userRepo;
@@ -30,7 +30,7 @@ namespace SocialNetwork.API.Controllers
         }
 
         [HttpPost("add-comments-to-posts/{postId}")]
-        public async Task<ActionResult> AddLike(int postId, [FromBody] string? content)
+        public async Task<ActionResult> AddComment(int postId, [FromBody] string? content)
         {
             var sourceUserId = User.GetUserId();
             var Comment = await _postRepo.GetPostById(postId);
@@ -42,30 +42,37 @@ namespace SocialNetwork.API.Controllers
 
             if (content == null) return BadRequest("What is your reaction to this post?");
                 
-            var userLike = new Comment
+            var userComment = new Comment
             {
                 UserId = sourceUserId,
                 PostId = postId,
                 Content = content
             };
 
-            sourceUser.Comments.Add(userLike);
+            sourceUser.Comments.Add(userComment);
 
             if(await _userRepo.SaveAllAsync()) return Ok("You commented this post");
 
-            return BadRequest("Fail to like user");
+            return BadRequest("Fail to comment user");
         }
+
+        //[HttpGet]
+        //public async Task<ActionResult<PagedList<InteractWithPostDto>>> GetUserComments([FromQuery] CommentsParams commentsParams)
+        //{
+        //    commentsParams.UserId = User.GetUserId();
+        //    var users = await _commentRepo.GetUserComments(commentsParams);
+        //    Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages));
+
+        //    return Ok(users);
+        //}
 
         [HttpGet]
-        public async Task<ActionResult<PagedList<InteractWithPostDto>>> GetUserLikes([FromQuery] CommentsParams commentsParams)
+        public async Task<ActionResult<PagedList<CommentDto>>> GetComments([FromQuery]CommentsParams commentsParams)
         {
-            commentsParams.UserId = User.GetUserId();
-            var users = await _commentRepo.GetUserComments(commentsParams);
-            Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages));
-
-            return Ok(users);
+            var comments = await _commentRepo.GetComments(commentsParams);
+            Response.AddPaginationHeader(new PaginationHeader(comments.CurrentPage, comments.PageSize, comments.TotalCount, comments.TotalPages));
+            return Ok(comments);
         }
-
         [HttpPut]
         public async Task<ActionResult> UpdateComment([FromBody]CommentDto commentDto)
         {

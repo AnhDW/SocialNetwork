@@ -13,21 +13,30 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepo _userRepo;
         private readonly IPostRepo _postRepo;
         private readonly IGroupRepo _groupRepo;
-        private readonly IGroupMemberRepo _memberRepo;
+        private readonly IGroupMemberRepo _groupMemberRepo;
+        private readonly IRoomRepo _roomRepo;
+        private readonly IRoomMemberRepo _roomMemberRepo;
         private readonly IAttachmentSvc _attachmentSvc;
         private readonly IMapper _mapper;
+        private readonly ITokenSvc _tokenSvc;
 
-        public UsersController(IUserRepo userRepo, IAttachmentSvc attachmentSvc, IMapper mapper, IPostRepo postRepo)
+        public UsersController(IUserRepo userRepo, IAttachmentSvc attachmentSvc, IMapper mapper, IPostRepo postRepo, IGroupRepo groupRepo, IRoomRepo roomRepo, IGroupMemberRepo groupMemberRepo, IRoomMemberRepo roomMemberRepo, ITokenSvc tokenSvc)
         {
             _userRepo = userRepo;
             _attachmentSvc = attachmentSvc;
             _mapper = mapper;
             _postRepo = postRepo;
+            _groupRepo = groupRepo;
+            _roomRepo = roomRepo;
+            _groupMemberRepo = groupMemberRepo;
+            _roomMemberRepo = roomMemberRepo;
+            _tokenSvc = tokenSvc;
         }
 
         [HttpGet]
@@ -55,6 +64,12 @@ namespace SocialNetwork.API.Controllers
             return await _userRepo.GetPersonalPageAsync(username);
         }
 
+        [HttpGet("timeline/{userId}")]
+        public async Task<ActionResult<PersonalPageDto>> GetTimeline(int userId)
+        {
+            return await _userRepo.GetPersonalPageByIdAsync(userId);
+        }
+
         [HttpPut]
         public async Task<ActionResult> UpdateUser(UpdateProfileDto updateProfile)
         {
@@ -67,6 +82,7 @@ namespace SocialNetwork.API.Controllers
             return BadRequest("Failed to update profile");
         }
 
+        
         [HttpPost("create-post")]
         public async Task<ActionResult<PostDto>> CreatePost([FromForm]PostDto postDto, [FromForm] List<IFormFile> files)
         {
@@ -92,10 +108,7 @@ namespace SocialNetwork.API.Controllers
             
             user.Posts.Add(post);
             if(await _userRepo.SaveAllAsync())
-            {
-
                 return CreatedAtAction(nameof(GetUser), new { username = user.UserName }, _mapper.Map<PostDto>(post));
-            }
 
             return BadRequest("Problem adding post");
         }
@@ -123,9 +136,8 @@ namespace SocialNetwork.API.Controllers
 
             user.Posts.Remove(post);
             if (await _userRepo.SaveAllAsync())
-            {
                 return Ok("deleted successfully"); 
-            }
+
             return BadRequest("Problem delete post");
         }
 
@@ -141,7 +153,13 @@ namespace SocialNetwork.API.Controllers
                 GroupName = groupDto.GroupName,
                 Description = groupDto.Description,
             };
-            
+            var groupMember = new GroupMember
+            {
+                MemberId = user.Id,
+                Role = "group master"
+            };
+
+            group.GroupMembers.Add(groupMember);
             user.Groups.Add(group);
 
             if (await _userRepo.SaveAllAsync()) 
@@ -157,9 +175,14 @@ namespace SocialNetwork.API.Controllers
 
             if (user == null) return NotFound();
 
-            var group = user.Groups.FirstOrDefault(g => g.Id == groupId);
+            var group = await _groupRepo.GetGroup(groupId);
 
-            if(group == null) return NotFound();
+            if (group == null) return NotFound();
+            var groupMembers = group.GroupMembers;
+            foreach( var member in groupMembers)
+            {
+                _groupMemberRepo.LeaveGroup(member);
+            }
 
             user.Groups.Remove(group);
 
@@ -167,6 +190,67 @@ namespace SocialNetwork.API.Controllers
 
             return BadRequest("Problem delete group");
 
+        }
+
+        [HttpPost("create-room")]
+        public async Task<ActionResult<RoomDto>> CreateRoom([FromBody] RoomDto roomDto)
+        {
+            var user = await _userRepo.GetByUsernameAsync(User.GetUsername());
+            if(user == null) return NotFound();
+
+            var roomMember = new RoomMember
+            {
+                MemberId = user.Id,
+                Role = "room master"
+            };
+            
+            var room = new Room
+            {
+                RoomName = roomDto.RoomName,
+                Description = roomDto.Description,
+            };
+            
+            room.RoomMembers.Add(roomMember);
+            user.Rooms.Add(room);
+
+            if(await _userRepo.SaveAllAsync())
+            {
+                return CreatedAtAction(nameof(GetUser), new { username = user.UserName}, _mapper.Map<RoomDto>(room));
+            }
+
+            return BadRequest("Problem add room");
+        }
+
+        [HttpDelete("delete-room/{roomId}")]
+        public async Task<ActionResult> DeleteRoom(int roomId)
+        {
+            var user = await _userRepo.GetByUsernameAsync(User.GetUsername());
+
+            if (user == null) return NotFound();
+
+            var room = await _roomRepo.GetRoom(roomId);
+
+            if (room == null) return NotFound();
+            var roomMembers = room.RoomMembers;
+            foreach (var member in roomMembers)
+            {
+                _roomMemberRepo.LeaveRoom(member);
+            }
+            user.Rooms.Remove(room);
+
+            if (await _userRepo.SaveAllAsync()) return Ok("deleted successfully");
+
+            return BadRequest("Problem delete room");
+        }
+
+        [HttpDelete("logout/{token}")]
+        public async Task<ActionResult> Logout(string token)
+        {
+            var user = await _userRepo.GetByIdAsync(User.GetUserId());
+            var currentToken = user.TokenManagements.FirstOrDefault(user => user.Token == token);
+            user.TokenManagements.Remove(currentToken!); 
+            if(await _userRepo.SaveAllAsync()) return Ok("Logout successfully"); 
+            return BadRequest("Problem logout user");
         }
     }
 }

@@ -1,12 +1,14 @@
-﻿using SocialNetwork.API.Entities;
-
-namespace SocialNetwork.API.Dtos
+﻿namespace SocialNetwork.API.Dtos
 {
     public class PostDto
     {
         public int Id { get; set; }
-        public string Content { get; set; }
+        public int UserId { get; set; }
+        public required string Content { get; set; }
         public string ShowMode { get; set; } = "Global"; //Global, Friends, Personal, SpecifiedObject
+        public string Countdown { get; set; }
+        public OwnerDto User { get; set; }
         public List<AttachmentDto> Attachments { get; set; } = new();
+        //public List<LikePostDto> LikePosts { get; set; } = new();
     }
 }

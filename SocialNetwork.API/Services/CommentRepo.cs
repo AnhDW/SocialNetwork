@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using SocialNetwork.API.Data;
 using SocialNetwork.API.Dtos;
@@ -73,6 +74,20 @@ namespace SocialNetwork.API.Services
         {
             _context.Comments.Update(comment);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<PagedList<CommentDto>> GetComments(CommentsParams commentsParams)
+        {
+            var query = _context.Comments
+                .Include(u=>u.User).OrderBy(d=>d.Timestamp)
+                .AsQueryable();
+
+            query = query.Where(p => p.PostId == commentsParams.PostId);
+
+            return await PagedList<CommentDto>.CreateAsync(
+                query.AsNoTracking().ProjectTo<CommentDto>(_mapper.ConfigurationProvider),
+                commentsParams.PageNumber,
+                commentsParams.PageSize);
         }
     }
 }

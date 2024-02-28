@@ -1,3 +1,6 @@
+Mục tiêu ngày mai: 
++ show tin nhắn theo phòng
++ show thành viên trong phòng  
 [
   {
     "UserName": "Rose",

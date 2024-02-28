@@ -1,5 +1,10 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SocialNetwork.API.Data;
+using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
+using SocialNetwork.API.Extensions;
 using SocialNetwork.API.Services.IServices;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,10 +15,15 @@ namespace SocialNetwork.API.Services
     public class TokenSvc : ITokenSvc
     {
         private readonly SymmetricSecurityKey _key;
-        public TokenSvc(IConfiguration config)
+        private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        public TokenSvc(IConfiguration config, DataContext context, IMapper mapper)
         {
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]!));
+            _context = context;
+            _mapper = mapper;
         }
+
         public string CreateToken(User user)
         {
             var claims = new List<Claim>
@@ -34,7 +44,24 @@ namespace SocialNetwork.API.Services
             var tokenHander = new JwtSecurityTokenHandler();
             var token = tokenHander.CreateToken(tokenDescriptor);
 
+            user.TokenManagements.Add(new TokenManagement { Token = tokenHander.WriteToken(token)});
+            _context.SaveChanges();
+
             return tokenHander.WriteToken(token);
+        }
+
+        public async Task<List<TokenManagementDto>> GetTokensInActive()
+        {
+            var tokens = await _context.TokenManagements.ToListAsync();
+            foreach(var token in tokens)
+            {
+                if (token.Created.CacuateTime() >= 7)
+                {
+                    token.IsActive = false;
+                }
+            }
+            await _context.SaveChangesAsync();
+            return _mapper.Map<List<TokenManagementDto>>(tokens);
         }
     }
 }

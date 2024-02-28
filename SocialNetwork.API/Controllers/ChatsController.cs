@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
@@ -14,6 +13,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class ChatsController : ControllerBase
     {
         private readonly IUserRepo _userRepo;

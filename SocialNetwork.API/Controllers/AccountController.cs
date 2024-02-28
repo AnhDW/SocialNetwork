@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using SocialNetwork.API.Data;
 using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
+using SocialNetwork.API.Extensions;
+using SocialNetwork.API.Helpers;
 using SocialNetwork.API.Services.IServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -25,6 +27,7 @@ namespace SocialNetwork.API.Controllers
             _tokenSvc = tokenSvc;
             _mapper = mapper;
         }
+
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register([FromBody]RegisterDto register)
         {
@@ -41,6 +44,7 @@ namespace SocialNetwork.API.Controllers
             await _context.SaveChangesAsync();
 
             return new UserDto {
+                Id = user.Id,
                 Username = user.UserName,
                 Token = _tokenSvc.CreateToken(user),
                 KnownAs = user.KnownAs,
@@ -65,6 +69,7 @@ namespace SocialNetwork.API.Controllers
 
             return new UserDto
             {
+                Id = user.Id,
                 Username = user.UserName,
                 Token = _tokenSvc.CreateToken(user),
                 KnownAs = user.KnownAs,
@@ -72,6 +77,15 @@ namespace SocialNetwork.API.Controllers
                 Gender = user.Gender,
             };
         }
+
+        [HttpPut("tokens")]
+        public async Task<ActionResult> GetTokens()
+        {
+            var tokens = await _tokenSvc.GetTokensInActive();
+            
+            return Ok(tokens);
+        }
+        
         private async Task<bool> UserExists(string username)
         {
             return await _context.Users.AnyAsync(x=>x.UserName == username);

@@ -17,6 +17,8 @@ namespace SocialNetwork.API.Dtos
         public DateTime CreatedDate { get; set; }
         public DateTime LastActive { get; set; }
         
-        public List<PostDto> Posts { get; set; }
+        //public List<PostDto> Posts { get; set; }
+        //public List<GroupDto> Groups { get; set; }
+        //public List<RoomDto> Rooms { get; set; }
     }
 }

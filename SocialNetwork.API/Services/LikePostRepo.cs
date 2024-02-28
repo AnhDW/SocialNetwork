@@ -12,10 +12,12 @@ namespace SocialNetwork.API.Services
     public class LikePostRepo : ILikePostRepo
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public LikePostRepo(DataContext context)
+        public LikePostRepo(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task Delete(LikePost likePost)
@@ -66,6 +68,12 @@ namespace SocialNetwork.API.Services
             });
 
             return await PagedList<InteractWithPostDto>.CreateAsync(likedUsers, likesParams.PageNumber, likesParams.PageSize);
+        }
+
+        public async Task<LikePostDto> LikePost(int userId, int postId)
+        {
+            var likePost = await _context.LikePosts.FindAsync(userId, postId);
+            return _mapper.Map<LikePostDto>(likePost);
         }
 
         public async Task Update(LikePost likePost)

@@ -2,7 +2,6 @@
 {
     public class LikePost
     {
-
         public int UserId {  get; set; }
         public int PostId {  get; set; }
         public string ReationType { get; set; }

@@ -7,7 +7,7 @@
         public int CreatorId { get; set; }
 
         public User User { get; set; }
-        public List<GroupMember> GroupMembers { get; set; }
+        public List<GroupMember> GroupMembers { get; set; } = new();
 
     }
 }

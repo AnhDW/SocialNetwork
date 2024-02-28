@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.API.Entities;
 using SocialNetwork.API.Extensions;
@@ -12,6 +11,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class GroupMembersController : ControllerBase
     {
         private readonly IUserRepo _userRepo;

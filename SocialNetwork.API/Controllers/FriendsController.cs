@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SocialNetwork.API.Data;
 using SocialNetwork.API.Dtos;
 using SocialNetwork.API.Entities;
 using SocialNetwork.API.Extensions;
@@ -14,6 +12,7 @@ namespace SocialNetwork.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ValidateToken]
     public class FriendsController : ControllerBase
     {
         private readonly IUserRepo _userRepo;
@@ -62,8 +61,10 @@ namespace SocialNetwork.API.Controllers
             if (friendUser == null) return NotFound();
 
             var userFriend = await _friendRepo.GetUserFriend(sourceUserId, friendUser.Id);
+            var checkInvitation = await _friendRepo.GetInvitation(sourceUserId);
             if (userFriend != null) return BadRequest();
-            
+            if (checkInvitation != null) return BadRequest();
+
             userFriend = new Friend
             {
                 UserId = sourceUserId,

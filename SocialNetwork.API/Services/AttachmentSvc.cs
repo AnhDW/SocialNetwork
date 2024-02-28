@@ -7,9 +7,7 @@ namespace SocialNetwork.API.Services
         public string AddAttachment(IFormFile file)
         {
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            string contentType = file.ContentType;
-
-            string fileType = contentType.Split('/')[0] + "s";
+            string fileType = file.ContentType.Split('/')[0] + "s";
 
             if (file.Length > 0)
             {
@@ -22,6 +20,7 @@ namespace SocialNetwork.API.Services
                 {
                     file.CopyTo(stream);
                 }
+
                 return "/" + fileType + "/" + fileName;
             }
             
